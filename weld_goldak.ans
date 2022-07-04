@@ -154,7 +154,7 @@ c_num = 120			!local csys number (unimportant)
 			! not bothering to apply heat if it's too low
 			! dunno how it affects performance, i don't remember it making a difference
 			*if,qf,gt,heat_tolerance,then
-				bfe,curr_el,HGEN,,qf	
+				bfe,curr_el,HGEN,,qf	! apply heat to the current element
 			*endif			
 		*enddo
 
