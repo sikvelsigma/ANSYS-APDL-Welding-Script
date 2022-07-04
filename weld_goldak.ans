@@ -155,7 +155,11 @@ c_num = 120			!local csys number (unimportant)
 			! dunno how it affects performance, i don't remember it making a difference
 			*if,qf,gt,heat_tolerance,then
 				bfe,curr_el,HGEN,,qf	! apply heat to the current element
-			*endif			
+			*endif	
+			
+			! get next element number
+			cmsel,s,selected_elements
+			curr_el = elnext(curr_el)
 		*enddo
 
 		allsel					! always "allsel" before solve
@@ -166,9 +170,6 @@ c_num = 120			!local csys number (unimportant)
 
 		csys,0					! returning to global csys
 
-		! get next element number
-		cmsel,s,selected_elements
-		curr_el = elnext(curr_el)
 	*enddo
 	
 	! add time for current path to overall time
