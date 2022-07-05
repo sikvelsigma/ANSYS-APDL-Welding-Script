@@ -11,28 +11,28 @@ thopt,full
 !------------Laser direction (local coord system): X-------------
 pi = 3.14159
 
-L_y = 0.0012							!y radius in local 
-L_z = 0.0010							!z radius in local 
-L_x1 = 0.002							!x front radius in local 
-L_x2 = 0.004							!x rear radius in local 
+L_y = <your_value>							!y radius in local 
+L_z = <your_value>							!z radius in local 
+L_x1 = <your_value>							!x front radius in local 
+L_x2 = <your_value>							!x rear radius in local 
 
 
-ff = 1.33						! front factor
+ff = <your_value>						! front factor
 fr = 2-ff						! rear factor (preset, don't change)
 
-W_p = 884/.8						! W, energy
-vel = 780/1000/60				! velocity
+W_p = <your_value>						! W, energy
+vel = <your_value>				! velocity
 	
 amb_temp = 20				! ambient temperature, used to fix dead elements temp
 
-time_cool = 20					! cooling time after welding was finished
+time_cool = <your_value>					! cooling time after welding was finished
 
 select_ratio = 5				! multiplier for selection in a sphere
 
 L_select = L_x2 * select_ratio
 !--------------Paths---------------
 !#
-path_num = 1				!number of paths
+path_num = <your_value>				!number of paths
 *dim,x_start,array,path_num
 *dim,y_start,array,path_num
 *dim,z_start,array,path_num
@@ -43,17 +43,17 @@ path_num = 1				!number of paths
 *dim,steps,array,path_num
 
 ! for more than 1 path just list items like this: "steps(1) = 120, 100, 50, ..."
-steps(1) = 120		!steps each path is divided in
+steps(1) = <your value>, <your value>, ...		!steps each path is divided in
 !starting coordinates
-x_start(1) = 0.0					
-y_start(1) = 0.001					
-z_start(1) = 0.02		
+x_start(1) = <your value>, <your value>, ...					
+y_start(1) = <your value>, <your value>, ...					
+z_start(1) = <your value>, <your value>, ...		
 !finish coordinates			
-x_finish(1) = 0.0				
-y_finish(1) = 0.001						
-z_finish(1) = 0.08	
+x_finish(1) = <your value>, <your value>, ...				
+y_finish(1) = <your value>, <your value>, ...						
+z_finish(1) = <your value>, <your value>, ...	
 ! rotation around x to point upwards normal vector (z) after all other rotations
-z_angle(1) = 90
+z_angle(1) = <your value>, <your value>, ...
 		
 !------------Processing-------------
 ! cmsel,s,killed_elems		! kill elements in "killed_elems" selection
