@@ -116,9 +116,10 @@ csys_num_sph = 122
 
 		! NOTE: so i tried to fix axis aligment but im not sure if it's 100% reliable
 
-
+		
 		*afun,deg	! set to degrees
 		! "clocal" creates CS based on the current active CS
+		csys,0	
 		clocal,csys_num_cart,cart,x_weld,y_weld,z_weld,ang_x,0,0
 		clocal,csys_num_cart,cart,0,0,0,0,0,ang_y
 		clocal,csys_num_cart,cart,0,0,0,0,ang_z,0	
