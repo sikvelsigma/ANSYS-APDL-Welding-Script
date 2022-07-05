@@ -1,7 +1,5 @@
 
-/solu
-film_coeff = 30				! convection coefficient
-amb_temp = 20				! ambient temperature				
+/solu			
 
 !  solver settings, if PCG doesn't work use SRAPSE	
 ANTYPE,4
@@ -10,34 +8,39 @@ TRNOPT,full
 NEQIT,60
 thopt,full
 !------------Parameters (assumed unit system: MKS)---------------
-!------------Laser direction (local coord system): Z-------------
-a = 0.0012						! x radius in local 
-b = 0.0010						! y radius in local 
-c1 = 0.002						! z front radius in local 
-c2 = 0.004						! z rear radius in local 
+!------------Laser direction (local coord system): X-------------
+pi=3.14159
+
+L_y=0.0012							!y radius in local 
+L_z=0.0010							!z radius in local 
+L_x1=0.002							!x front radius in local 
+L_x2=0.004							!x rear radius in local 
+
 
 ff = 1.33						! front factor
 fr = 2-ff						! rear factor (preset, don't change)
 
-q = 884/.8						! W, energy
+W_p = 884/.8						! W, energy
 vel = 780/1000/60				! velocity
 	
+amb_temp = 20				! ambient temperature, used to fix dead elements temp
 
-time_cool = 400					! cooling time after welding was finished
-heat_tolerance = 0.001			! if resulting heat is less it is set to 0
+time_cool = 20					! cooling time after welding was finished
 
-c1_live_ratio = 1.5				! multiplier for activating dead elements
+select_ratio = 5				! multiplier for selection in a sphere
 
+L_select=L_x2*select_ratio
 !--------------Paths---------------
 !#
 path_num = 1				!number of paths
-*dim,x_start,,path_num
-*dim,y_start,,path_num
-*dim,z_start,,path_num
-*dim,x_finish,,path_num
-*dim,y_finish,,path_num
-*dim,z_finish,,path_num
-*dim,steps,,path_num
+*dim,x_start,array,path_num
+*dim,y_start,array,path_num
+*dim,z_start,array,path_num
+*dim,x_finish,array,path_num
+*dim,y_finish,array,path_num
+*dim,z_finish,array,path_num
+*dim,z_angle,array,path_num
+*dim,steps,array,path_num
 
 steps(1) = 120		!steps each path is divided in
 !starting coordinates
@@ -48,16 +51,21 @@ z_start(1) = 0.02
 x_finish(1) = 0.0				
 y_finish(1) = 0.001						
 z_finish(1) = 0.08	
-	
+! rotation around x to point upwards normal vector (z) after all other rotations
+z_angle(1) = 90
 		
 !------------Processing-------------
-cmsel,s,killed_elems		! kill elements in "killed_elems" selection
-ekill,all
+! cmsel,s,killed_elems		! kill elements in "killed_elems" selection
+! ekill,all
 
 
 time_weld_overall = 0			! overall process time
 csys,0				!set active CS to 0 (global cartesian)
-c_num = 120			!local csys number (unimportant)
+
+!local csys numbers
+csys_num_cart = 120			
+csys_num_cyl = 121
+csys_num_sph = 122
 ! loop over each path
 *do,kk,1,path_num
 	! path length
@@ -77,9 +85,9 @@ c_num = 120			!local csys number (unimportant)
 
 	! loop over each step in a path
 	*do,ii,1,steps(kk)+1
-		!deleting all heat generation from previous step		
 		esel,all
-		bfedele,all,HGEN		
+		bfedele,all,HGEN		! deleting all heat generation from previous step
+		ddele,all,temp			! deleting all temperature constraints, used for deleting temp from dead elements
 		
 		time_stepped = ii*time_step_weld	! time of the welding process for a path
 		time_sol = (ii-1)*time_step_weld	! time for calculating current position of the heat source
@@ -93,32 +101,62 @@ c_num = 120			!local csys number (unimportant)
 		y_weld = y_s_active+vel*time_sol*cos_y
 		z_weld = z_s_active+vel*time_sol*cos_z
 
-		! aline local csys z axis with directional vector
-		! NOTE: there might be some edge cases this will work incorrectly in so be cautious
-		! 		i can't be bothered to test this thoroughly, this is a super-old script after all
+		! rotations to aligne local coordinate system with x facing weld path and z as upper normal
+		*afun,deg
+		*if,cos_y,eq,0,then
+			ang_x = 0
+		*else
+			ang_x = acos(cos_x)*SIGN(1,cos_y)
+		*endif
+		ang_y = -(90-acos(cos_z))*SIGN(1,cos_x)
+		ang_z = z_angle(kk)
+		*afun,rad
+		
+
+		! NOTE: so i tried to fix axis aligment but im not sure if it's 100% reliable
+
 
 		*afun,deg	! set to degrees
 		! "clocal" creates CS based on the current active CS
-		clocal,c_num-1,0,x_weld,y_weld,z_weld,0,0,acos(cos_z)*SIGN(1,cos_x)
-		clocal,c_num,0,0,0,0,0,(90-acos(cos_y)),0
+		clocal,csys_num_cart,cart,x_weld,y_weld,z_weld,ang_x,0,0
+		clocal,csys_num_cart,cart,0,0,0,0,0,ang_y
+		clocal,csys_num_cart,cart,0,0,0,0,ang_z,0	
+		clocal,csys_num_cyl,cylin,0,0,0	
+		clocal,csys_num_sph,sphe,0,0,0
 		*afun,rad	! set to radians
 		
-		csys,c_num				! activate local csys
+		! -------------------------------------------------
+		! this block is with mechanics of element birth and death, i decided to comment it out
+		! -------------------------------------------------
+		! select dead elements in a an a sphere
+		! NOTE: you need to define element selection of each weld as weld_1, weld_2, etc for it to work
 		
-		! select dead elements in a an interval between -c2..c1*c1_live_ratio and make them alive
-		! NOTE: this is a sub-optimal solution, a better way would be to select in a sphere or a cylinder 
-		!		one just needs to create additional local CS in the same position as c_num, but yet again
-		! 		i can't be bothered to fix this
-		cmsel,s,killed_elems
-		esel,u,live
-		esel,r,cent,z,-c2,c1*c1_live_ratio
-		ealive,all
+		! csys,csys_num_sph
+		! nsel,s,loc,x,0,L_select
+		! esln
+		! cmsel,r,weld_%kk%
+		! esel,u,live
+		! ealive,all
+		
+		! fix dead elements temperature as ambient
+		! dead elements still receive heat if you don't do this
+		
+		! esel,s,live
+		! nsle
+		! nsel,inve
+		! d,all,temp,amb_temp
+		
+		! -------------------------------------------------
+		! -------------------------------------------------
+		! -------------------------------------------------
 		
 		! select all viable elements to apply heat to
+		cmsel,s,heated_elements			! heated_elements is a selection of elements that can receive heat 
+		csys,csys_num_sph
+		nsel,s,loc,x,0,L_select			! select elements in a sphere around current center
+		esln
+		esel,r,live						! apply heat only for live elements
 		csys,0
-		cmsel,s,weld_layer			! "weld_layer" is a selection of elements that can receive heat 
-		csys,c_num
-		esel,r,live
 		cm,selected_elements,elem
 
 		! loop over all selected elements
@@ -130,16 +168,17 @@ c_num = 120			!local csys number (unimportant)
 			! selection it will return 0 thus we ensure we looped over selection completely
 
 			! get current element position in local CS
+			csys,csys_num_cart
 			*get,x1,elem,curr_el,cent,x
 			*get,y1,elem,curr_el,cent,y
 			*get,z1,elem,curr_el,cent,z
 			
 			! selecting if front or rear
-			*if,z1,gt,0,then 
-				c = c1
+			*if,x1,gt,0,then 
+				L_x = L_x1
 				f1 = ff
 			*else
-				c = c2
+				L_x = L_x2
 				f1 = fr
 			*endif
 
@@ -148,15 +187,10 @@ c_num = 120			!local csys number (unimportant)
 			! 		as much as possible for speed (even tho it might seem insignificant it all adds up in big simulations)
 			! 		so you should divide this formulas into parts that can be calculated outside the loop for reuse and parts
 			! 		which you need to recalculate for every element
-			part1 = (6*(3**0.5)*f1*q)/(a*b*c*3.14*(3.14**0.5))
-			part2 = (exp(-3*(x1/a)**2))*(exp(-3*(y1/b)**2))*(exp(-3*((z1/c)**2)))
+			part1 = (6*(3**0.5)*f1*W_p)/(L_x*L_y*L_z*pi*(pi**0.5))
+			part2 = (exp(-3*(x1/L_x)**2))*(exp(-3*(y1/L_y)**2))*(exp(-3*((z1/L_z)**2)))
 			qf = part1*part2 
-			
-			! not bothering to apply heat if it's too low
-			! dunno how it affects performance, i don't remember it making a difference
-			*if,qf,gt,heat_tolerance,then
-				bfe,curr_el,HGEN,,qf	! apply heat to the current element
-			*endif	
+			bfe,curr_el,HGEN,,qf	! apply heat to the current element
 			
 			! get next element number
 			cmsel,s,selected_elements
@@ -166,11 +200,7 @@ c_num = 120			!local csys number (unimportant)
 		allsel					! always "allsel" before solve
 		solve
 
-		csdele,c_num			! deleting local csys, this is unneccessary
-		csdele,c_num-1
-
 		csys,0					! returning to global csys
-
 	*enddo
 	
 	! add time for current path to overall time

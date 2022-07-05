@@ -1,3 +1,4 @@
+- Update 3: fixed local CS orientation issue, added example generated in WB, i used it to verify the model with [this article](https://www.sciencedirect.com/science/article/abs/pii/S0927025607003345)
 - Update 2: added some missing commands
 - Update 1: there was an error in the code on the init commit
 
