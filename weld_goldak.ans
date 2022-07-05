@@ -9,12 +9,12 @@ NEQIT,60
 thopt,full
 !------------Parameters (assumed unit system: MKS)---------------
 !------------Laser direction (local coord system): X-------------
-pi=3.14159
+pi = 3.14159
 
-L_y=0.0012							!y radius in local 
-L_z=0.0010							!z radius in local 
-L_x1=0.002							!x front radius in local 
-L_x2=0.004							!x rear radius in local 
+L_y = 0.0012							!y radius in local 
+L_z = 0.0010							!z radius in local 
+L_x1 = 0.002							!x front radius in local 
+L_x2 = 0.004							!x rear radius in local 
 
 
 ff = 1.33						! front factor
@@ -29,7 +29,7 @@ time_cool = 20					! cooling time after welding was finished
 
 select_ratio = 5				! multiplier for selection in a sphere
 
-L_select=L_x2*select_ratio
+L_select = L_x2 * select_ratio
 !--------------Paths---------------
 !#
 path_num = 1				!number of paths
@@ -42,6 +42,7 @@ path_num = 1				!number of paths
 *dim,z_angle,array,path_num
 *dim,steps,array,path_num
 
+! for more than 1 path just list items like this: "steps(1) = 120, 100, 50, ..."
 steps(1) = 120		!steps each path is divided in
 !starting coordinates
 x_start(1) = 0.0					
@@ -69,11 +70,11 @@ csys_num_sph = 122
 ! loop over each path
 *do,kk,1,path_num
 	! path length
-	direct_len = ((x_start(kk)-x_finish(kk))**2+(y_start(kk)-y_finish(kk))**2+(z_start(kk)-z_finish(kk))**2)**0.5
+	direct_len = ((x_start(kk)-x_finish(kk))**2 + (y_start(kk)-y_finish(kk))**2 + (z_start(kk)-z_finish(kk))**2)**0.5
 	! guide angles
-	cos_x = (x_finish(kk)-x_start(kk))/direct_len
-	cos_y = (y_finish(kk)-y_start(kk))/direct_len
-	cos_z = (z_finish(kk)-z_start(kk))/direct_len
+	cos_x = (x_finish(kk)-x_start(kk)) / direct_len
+	cos_y = (y_finish(kk)-y_start(kk)) / direct_len
+	cos_z = (z_finish(kk)-z_start(kk)) / direct_len
 
 	! starting positions for each component
 	x_s_active = x_start(kk)
@@ -187,8 +188,8 @@ csys_num_sph = 122
 			! 		as much as possible for speed (even tho it might seem insignificant it all adds up in big simulations)
 			! 		so you should divide this formulas into parts that can be calculated outside the loop for reuse and parts
 			! 		which you need to recalculate for every element
-			part1 = (6*(3**0.5)*f1*W_p)/(L_x*L_y*L_z*pi*(pi**0.5))
-			part2 = (exp(-3*(x1/L_x)**2))*(exp(-3*(y1/L_y)**2))*(exp(-3*((z1/L_z)**2)))
+			part1 = (6*(3**0.5)*f1*W_p) / (L_x*L_y*L_z*pi*(pi**0.5))
+			part2 = (exp(-3*(x1/L_x)**2)) * (exp(-3*(y1/L_y)**2)) * (exp(-3*((z1/L_z)**2)))
 			qf = part1*part2 
 			bfe,curr_el,HGEN,,qf	! apply heat to the current element
 			
@@ -214,7 +215,7 @@ allsel
 TIME,time_weld_overall
 autots,on    						! use automatic time-stepping
 deltim, 10, 5, 40, on
-TIME,time_weld_overall+time_cool	! cooling time
+TIME,time_weld_overall + time_cool	! cooling time
 
 allsel
 solve
