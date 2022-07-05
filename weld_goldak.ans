@@ -4,6 +4,7 @@ film_coeff = 30				! convection coefficient
 amb_temp = 20				! ambient temperature				
 
 !  solver settings, if PCG doesn't work use SRAPSE	
+ANTYPE,4
 EQSLV,PCG
 TRNOPT,full
 NEQIT,60
@@ -184,3 +185,6 @@ TIME,time_weld_overall
 autots,on    						! use automatic time-stepping
 deltim, 10, 5, 40, on
 TIME,time_weld_overall+time_cool	! cooling time
+
+allsel
+solve

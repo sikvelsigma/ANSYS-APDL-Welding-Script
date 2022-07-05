@@ -1,4 +1,5 @@
-Update 1: there was an error in the code on the init commit
+- Update 2: added some missing commands
+- Update 1: there was an error in the code on the init commit
 
 # ANSYS-APDL-Welding-Script
 So I decided to publish this old script of mine for weld simulation in APDL using Goldak heat source. This is a very bare-bones implementation, largely untested, but as far as I can remember it did the job. I have to note that I have a far more advanced version of a welding script with a lot of features but, well, it's a mess, an unholy abomination of spaghetti code nobody but I can make a sense of (tho I still struggle since it's been a while since I touched it). So it would be counter-productive to publish it, it would only confuse people, not helping with anything. This simple script is not intended as a ready solution but rather an example to build upon for your own purpose, it doesn't have all the features, all the little optimizations I figured out to squeeze out that extra millisecond of perfomance, but I hope it might help you get started.
