@@ -86,7 +86,7 @@ csys_num_sph = 122
 
 	! loop over each step in a path
 	*do,ii,1,steps(kk)+1
-		esel,all
+		allsel
 		bfedele,all,HGEN		! deleting all heat generation from previous step
 		ddele,all,temp			! deleting all temperature constraints, used for deleting temp from dead elements
 		
