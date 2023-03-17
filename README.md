@@ -1,3 +1,7 @@
+**Note:** Hey! If you found this useful, leave a star so I know all of this was of use to someone! Thanks!
+
+---
+
 - Update 3: fixed local CS orientation issue, added example generated in WB, i used it to verify (thermal and mechanical parts both) the welding model with [this article](https://www.sciencedirect.com/science/article/abs/pii/S0927025607003345), it gives a good agreements with it, tho there's no mechanical part in the example script, you'll have to do it yourself if you want a full verification
 - Update 2: added some missing commands
 - Update 1: there was an error in the code on the init commit
